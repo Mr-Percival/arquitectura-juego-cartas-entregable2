@@ -1,0 +1,55 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.2, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\abuel\Unal\2026-2\Fund de Arqui de Soft\Entregable2\.venv\Scripts\python.exe
+rootdir: C:\Users\abuel\Unal\2026-2\Fund de Arqui de Soft\Entregable2
+configfile: pyproject.toml
+plugins: platformdirs-4.13.3
+collecting ... collected 44 items
+
+tests/architecture/test_r1_aislamiento_capas.py::test_presentacion_no_accede_a_persistencia PASSED
+tests/architecture/test_r1_aislamiento_capas.py::test_nucleo_no_depende_de_persistencia PASSED
+tests/architecture/test_r1_aislamiento_capas.py::test_nucleo_no_depende_de_presentacion PASSED
+tests/architecture/test_r1_aislamiento_capas.py::test_ningun_modulo_interno_importa_el_adaptador_de_persistencia PASSED
+tests/architecture/test_r1_aislamiento_capas.py::test_solo_persistencia_importa_el_driver_de_base_de_datos PASSED
+tests/architecture/test_r1_aislamiento_capas.py::test_reglas_y_puntuacion_no_dependen_de_la_orquestacion PASSED
+tests/architecture/test_r2_deteccion_violacion.py::test_r2_detecta_import_entre_plugins PASSED
+tests/architecture/test_r2_independencia_reglas.py::test_clasica_no_depende_de_apuntado PASSED
+tests/architecture/test_r2_independencia_reglas.py::test_apuntado_no_depende_de_clasica PASSED
+tests/architecture/test_r2_independencia_reglas.py::test_plugins_solo_importan_el_contrato PASSED
+tests/architecture/test_r2_independencia_reglas.py::test_nucleo_no_conoce_plugins_concretos PASSED
+tests/architecture/test_r2_independencia_reglas.py::test_orquestador_no_conoce_reglas_ni_datos PASSED
+tests/architecture/test_r4_sin_ciclos.py::test_grafo_de_componentes_es_aciclico PASSED
+tests/architecture/test_r4_sin_ciclos.py::test_el_detector_encuentra_ciclos PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[nucleo\\contrato\\combinaciones.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[nucleo\\evaluacion\\evaluador.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[nucleo\\evaluacion\\__init__.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[plugins\\__init__.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[plugins\\apuntado\\plugin.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[plugins\\apuntado\\__init__.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[plugins\\clasica\\plugin.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_evaluadores_cc_maximo_10[plugins\\clasica\\__init__.py] PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_todo_el_codigo_cc_maximo_15 PASSED
+tests/architecture/test_r5_complejidad_ciclomatica.py::test_radon_detecta_un_metodo_complejo PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_se_descubren_las_dos_variantes PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_cada_plugin_cumple_el_contrato[APUNTADO_101] PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_cada_plugin_cumple_el_contrato[CLASICA_433] PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_escalera_misma_pinta_si_y_pintas_mezcladas_no PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_clasica_acepta_cuarta_dos_ternas_y_descarte PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_apuntado_rechaza_tocar_con_sobrante_de_7 PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_variante_nueva_se_registra_sin_tocar_el_nucleo PASSED
+tests/architecture/test_r7_contrato_plugins.py::test_plugin_con_contrato_de_otra_version_mayor_se_rechaza PASSED
+tests/architecture/test_r8_rendimiento_evaluador.py::test_p95_evaluar_cierre_menor_a_50ms[CLASICA_433] [R8] CLASICA_433: p95 = 1.54 ms sobre 10000 manos
+PASSED
+tests/architecture/test_r8_rendimiento_evaluador.py::test_p95_evaluar_cierre_menor_a_50ms[APUNTADO_101] [R8] APUNTADO_101: p95 = 5.21 ms sobre 10000 manos
+PASSED
+tests/architecture/test_r9_orquestacion_cierre.py::test_publica_despues_de_persistir PASSED
+tests/architecture/test_r9_orquestacion_cierre.py::test_no_publica_si_la_persistencia_falla PASSED
+tests/architecture/test_r9_orquestacion_cierre.py::test_dos_cierres_simultaneos_solo_uno_persiste PASSED
+tests/architecture/test_r9_orquestacion_cierre.py::test_jugador_fuera_de_turno_es_rechazado PASSED
+tests/integracion/test_persistencia_postgres.py::test_catalogo_de_54_cartas PASSED
+tests/integracion/test_persistencia_postgres.py::test_partida_multironda_apuntado_acumula_hasta_101 PASSED
+tests/integracion/test_persistencia_postgres.py::test_partida_clasica_es_atomica_de_una_ronda PASSED
+tests/integracion/test_persistencia_postgres.py::test_dos_cierres_simultaneos_solo_uno_gana PASSED
+tests/integracion/test_persistencia_postgres.py::test_fallo_a_mitad_del_cierre_no_deja_escrituras_parciales PASSED
+tests/integracion/test_persistencia_postgres.py::test_no_puede_haber_dos_rondas_abiertas PASSED
+
+============================= 44 passed in 43.44s =============================

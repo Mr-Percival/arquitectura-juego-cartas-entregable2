@@ -1,0 +1,154 @@
+@startuml componentes_microkernel
+' Diagrama UML 2.5 de componentes detallado - Microkernel - V-0.0.1.0 (Entregable 2)
+' Conector ball-and-socket: el socket "(" lo pone quien REQUIERE la interfaz (puerto del requeridor);
+' el lollipop "0" lo pone quien la PROVEE (puerto del proveedor).
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam nodesep 12
+skinparam ranksep 14
+skinparam component {
+  BackgroundColor #F7F9FC
+  BorderColor #2F4A6D
+}
+skinparam interface {
+  BackgroundColor #FFFFFF
+  BorderColor #2F4A6D
+}
+skinparam package {
+  BorderColor #8A9BB3
+  FontColor #2F4A6D
+}
+
+component "GameClientUI\n«navegador»" as UI {
+  portout " " as UI_o
+}
+
+package "presentacion" {
+  component "GameGateway\n«adaptador REST + WebSocket»" as GW {
+    portin " " as GW_p
+    portout " " as GW_o
+  }
+}
+
+package "Core System «núcleo» (particionado por dominio, ADR-01)" {
+  package "nucleo.sala" {
+    component "RoomSetupComponent" as ROOM {
+      portin " " as ROOM_p
+      portout " " as ROOM_o
+    }
+  }
+  package "nucleo.turno" {
+    component "TurnOrchestratorComponent\n«mediador del flujo»" as TURN {
+      portin " " as TURN_p
+      portin " " as TURN_i
+      portin " " as TURN_t
+      portout " " as TURN_o
+    }
+    component "DeckDealerComponent" as DEAL {
+      portin " " as DEAL_p
+    }
+    component "TurnTimerComponent" as TIMER {
+      portin " " as TIMER_p
+      portout " " as TIMER_o
+    }
+  }
+  package "nucleo.evaluacion" {
+    component "HandEvaluatorComponent" as EVAL {
+      portin " " as EVAL_p
+      portout " " as EVAL_o
+    }
+  }
+  package "nucleo.puntuacion" {
+    component "RoundScoringComponent" as SCORE {
+      portin " " as SCORE_p
+      portout " " as SCORE_o
+    }
+    component "MatchStandingsComponent" as STAND {
+      portin " " as STAND_p
+      portout " " as STAND_o
+    }
+  }
+  package "nucleo.registro" {
+    component "PluginRegistry\n«registro de plug-ins»" as REG {
+      portin " " as REG_p
+      portout " " as REG_o
+    }
+  }
+  package "nucleo.soporte" {
+    component "LocalEventBus" as BUS {
+      portin " " as BUS_p
+      portin " " as BUS_s
+    }
+    component "MatchRecordComponent" as REC {
+      portin " " as REC_p
+      portout " " as REC_o
+    }
+  }
+  component "nucleo.contrato\n«library» SPI + kit de validadores" as CONT
+}
+
+package "persistencia" {
+  component "PostgresRepositoryAdapter" as PG {
+    portin " " as PG_p
+  }
+}
+database "PostgreSQL" as DB
+
+package "juegocartas.plugins «plug-ins» (descubiertos por entry points)" {
+  component "ReglaClasicaPlugin\n«plug-in» 1 cuarta + 2 ternas + 1 descarte" as P1 {
+    portin " " as P1_p
+  }
+  component "ReglaApuntadoPlugin\n«plug-in» 3 ternas + sobrantes < 5 pts + conteo a 101" as P2 {
+    portin " " as P2_p
+  }
+}
+
+UI_o --(0-- GW_p : IApiPartida
+GW_o --(0-- ROOM_p : IConfigurarSala
+GW_o --(0-- TURN_p : IComandosTurno
+GW_o --(0-- REC_p : IConsultarHistorial
+GW_o --(0-- BUS_s : ISuscribirEventos
+
+ROOM_o --(0-- TURN_i : IIniciarPartida
+ROOM_o --(0-- REG_p : IResolverVariante
+TIMER_o --(0-- TURN_t : ITiempoAgotado
+TURN_o -(0- TIMER_p : IProgramarTimeout
+TURN_o -(0- DEAL_p : IRepartirMazo
+TURN_o --(0-- EVAL_p : IEvaluarMano
+TURN_o --(0-- SCORE_p : ILiquidarRonda
+TURN_o --(0-- BUS_p : IPublicarEvento
+SCORE_o -(0- STAND_p : IActualizarMarcador
+TURN_o --(0-- REC_p : IRegistrarRonda
+EVAL_o --(0-- REG_p : IResolverVariante
+SCORE_o --(0-- REG_p : IResolverVariante
+STAND_o --(0-- REG_p : IResolverVariante
+REC_o --(0-- PG_p : IRepositorioPartidas
+PG --> DB : SQL / transacción ACID
+
+REG_o --(0-- P1_p : «contract» VariantePlugin
+REG_o --(0-- P2_p : «contract» VariantePlugin
+P1 ..> CONT : «import»
+P2 ..> CONT : «import»
+
+note bottom of P2
+  Contrato común (SPI), versionado:
+  codigo(), versionContrato(),
+  esquemaConfiguracion(),
+  reglaCierre(cfg), tablaPuntos(cfg),
+  politicaFin(cfg)
+  Descubrimiento: entry points
+  «juegocartas.variantes» al arrancar
+end note
+
+note as LEYENDA
+  <b>Leyenda</b> · UML 2.5 · V-0.0.1.0
+  □ puerto · ○ lollipop = interfaz provista · ) socket = interfaz requerida
+  Los plug-ins solo dependen del contrato; el núcleo nunca importa un plug-in.
+  TurnOrchestrator no conoce ni el plug-in ni la base de datos:
+  evalúa vía IEvaluarMano y persiste vía IRegistrarRonda (mediador).
+  Cada plug-in provee su propio lollipop «contract» VariantePlugin;
+  la línea punteada «import» indica que solo importa nucleo.contrato.
+end note
+@enduml

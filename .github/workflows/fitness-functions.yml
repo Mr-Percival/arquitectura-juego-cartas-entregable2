@@ -1,0 +1,16 @@
+# Gobernanza automatizada (sección 5): el build falla si se viola una regla de arquitectura.
+name: fitness-functions
+on: [push, pull_request]
+jobs:
+  arquitectura:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Fitness functions (PyTestArch, ciclos, contrato, CC con radon) + integración PostgreSQL
+        run: pytest tests -v
+      - name: Reporte de complejidad ciclomática (informativo)
+        run: radon cc src -s -a

@@ -1,0 +1,158 @@
+@startuml relacional_fisico
+' Modelo relacional físico (PostgreSQL 16) - 3FN - V-0.0.1.0. Fuente de verdad: docs/modelos/sql/esquema.sql
+!pragma layout smetana
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 40
+skinparam class {
+  BackgroundColor #F7F9FC
+  BorderColor #2F4A6D
+  ArrowColor #2F4A6D
+}
+hide circle
+hide methods
+
+entity "jugador" as jugador {
+  <b>PK</b> jugador_id : UUID
+  --
+  alias : VARCHAR(30) <<UQ>>
+  correo : VARCHAR(120) <<UQ, NULL>>
+  creado_en : TIMESTAMPTZ
+}
+entity "sesion" as sesion {
+  <b>PK</b> sesion_id : UUID
+  --
+  <b>FK</b> jugador_id : UUID
+  token_hash : CHAR(64) <<UQ>>
+  estado : VARCHAR(10)
+  iniciada_en, ultima_actividad, expira_en : TIMESTAMPTZ
+}
+entity "sala" as sala {
+  <b>PK</b> sala_id : UUID
+  --
+  codigo_invitacion : CHAR(6) <<UQ>>
+  <b>FK</b> anfitrion_id : UUID
+  capacidad : SMALLINT {2..6}
+  estado : VARCHAR(10)
+  creada_en : TIMESTAMPTZ
+}
+entity "variante" as variante {
+  <b>PK</b> variante_codigo : VARCHAR(30)
+  --
+  nombre : VARCHAR(60)
+  version_plugin : VARCHAR(20)
+  version_contrato : VARCHAR(10)
+  activa : BOOLEAN
+  registrada_en : TIMESTAMPTZ
+}
+entity "partida" as partida {
+  <b>PK</b> partida_id : UUID
+  --
+  <b>FK</b> sala_id : UUID
+  <b>FK</b> variante_codigo : VARCHAR(30)
+  estado : VARCHAR(12)
+  iniciada_en : TIMESTAMPTZ <<NULL>>
+  finalizada_en : TIMESTAMPTZ <<NULL>>
+  <b>FK</b> ganador_id : UUID <<NULL>>
+}
+entity "parametro_partida" as parametro {
+  <b>PK,FK</b> partida_id : UUID
+  <b>PK</b> clave : VARCHAR(40)
+  --
+  valor : VARCHAR(60)
+}
+entity "participacion" as participacion {
+  <b>PK,FK</b> partida_id : UUID
+  <b>PK,FK</b> jugador_id : UUID
+  --
+  asiento : SMALLINT <<UQ con partida>>
+  estado_jugador : VARCHAR(12)
+}
+entity "puntaje_acumulado" as acumulado {
+  <b>PK,FK</b> partida_id : UUID
+  <b>PK,FK</b> jugador_id : UUID
+  --
+  total : INTEGER
+  version : INTEGER
+  actualizado_en : TIMESTAMPTZ
+}
+entity "ronda" as ronda {
+  <b>PK</b> ronda_id : UUID
+  --
+  <b>FK</b> partida_id : UUID
+  numero : SMALLINT <<UQ con partida>>
+  estado : VARCHAR(10)
+  semilla : BIGINT
+  iniciada_en : TIMESTAMPTZ
+  cerrada_en : TIMESTAMPTZ <<NULL>>
+  <b>FK</b> cerrada_por : UUID <<NULL>>
+  tipo_cierre : VARCHAR(20) <<NULL>>
+}
+entity "carta" as carta {
+  <b>PK</b> carta_codigo : VARCHAR(3)
+  --
+  rango : SMALLINT <<NULL>>
+  pinta : CHAR(1) <<NULL>>
+}
+entity "mano_jugador" as mano {
+  <b>PK</b> mano_id : UUID
+  --
+  <b>FK</b> ronda_id : UUID
+  <b>FK</b> jugador_id : UUID
+}
+entity "carta_mano" as cartamano {
+  <b>PK,FK</b> mano_id : UUID
+  {field} <b>PK,FK</b> carta_codigo : VARCHAR(3)
+  <b>PK</b> mazo_numero : SMALLINT
+}
+entity "turno_jugada" as jugada {
+  <b>PK</b> jugada_id : BIGINT IDENTITY
+  --
+  <b>FK</b> mano_id : UUID
+  numero_turno : INTEGER
+  accion : VARCHAR(16)
+  <b>FK</b> carta_codigo : VARCHAR(3) <<NULL>>
+  mazo_numero : SMALLINT <<NULL>>
+  resultado : VARCHAR(10)
+  motivo_rechazo : VARCHAR(200) <<NULL>>
+  comando_id : UUID <<UQ>>
+  ocurrida_en : TIMESTAMPTZ
+}
+entity "puntaje_ronda" as puntronda {
+  <b>PK,FK</b> ronda_id : UUID
+  <b>PK,FK</b> jugador_id : UUID
+  --
+  penalizacion : SMALLINT
+  bonificacion : SMALLINT
+}
+
+jugador ||--o{ sesion
+jugador ||--o{ sala
+sala ||--o{ partida
+variante ||--o{ partida
+jugador |o--o{ partida : ganador
+partida ||--o{ parametro
+partida ||--|{ participacion
+jugador ||--o{ participacion
+participacion ||--o| acumulado
+partida ||--o{ ronda
+participacion |o--o{ ronda : cerrada_por
+ronda ||--o{ mano
+jugador ||--o{ mano
+mano ||--o{ cartamano
+carta ||--o{ cartamano
+mano ||--o{ jugada
+carta |o--o{ jugada
+ronda ||--o{ puntronda
+jugador ||--o{ puntronda
+
+note bottom of ronda
+  Índice único parcial: una sola ronda
+  EN_JUEGO por partida (ux_ronda_abierta_por_partida).
+  CHECK: LIQUIDADA <=> cerrada_por, tipo_cierre
+  y cerrada_en no nulos.
+end note
+@enduml

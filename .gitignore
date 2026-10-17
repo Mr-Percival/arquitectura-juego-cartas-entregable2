@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+herramientas/plantuml.jar
+docs/informe/build/_build.html
+docs/informe/build/_raw.pdf
+# El informe lleva datos personales (cédulas): se entrega por la plataforma, no en el repo público
+docs/informe/Entregable2.html
+docs/informe/Entregable2.pdf
+docs/informe/build/_build.html

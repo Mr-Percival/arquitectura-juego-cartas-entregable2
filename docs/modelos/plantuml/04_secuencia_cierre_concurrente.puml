@@ -1,0 +1,45 @@
+@startuml secuencia_cierre_concurrente
+' Cierre de ronda atómico con dos solicitudes simultáneas - V-0.0.1.0
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequence {
+  ParticipantBorderColor #2F4A6D
+  ParticipantBackgroundColor #F7F9FC
+  LifeLineBorderColor #8A9BB3
+  ArrowColor #2F4A6D
+}
+participant "Jugador A\n(GameGateway)" as A
+participant "Jugador B\n(GameGateway)" as B
+participant "TurnOrchestrator" as T
+participant "HandEvaluator\n+ plug-in" as E
+participant "RoundScoring /\nMatchStandings" as S
+participant "MatchRecord →\nPostgresRepositoryAdapter" as R
+database "PostgreSQL" as DB
+
+A -> T : solicitarCierre(cmd A)
+B -> T : solicitarCierre(cmd B)
+note over T : Capa 1: candado por partida.\nB espera a que A termine.
+T -> T : validar FSM (A en turno,\nfase ESPERANDO_DESCARTE)
+T -> E : evaluarCierre(variante, cfg, mano)
+E --> T : EvaluacionCierre(valida, TOCAR)
+T -> S : penalizaciones + actualizar marcador
+S --> T : deltas, DecisionFin
+T -> R : registrarRonda(CierreRonda)
+R -> DB : BEGIN
+R -> DB : SELECT estado FROM ronda\nWHERE ronda_id = ? FOR UPDATE
+note right of DB : Capa 2: bloqueo de fila
+DB --> R : EN_JUEGO
+R -> DB : INSERT turno_jugada (comando_id UNIQUE)\nUPDATE ronda → LIQUIDADA\nINSERT puntaje_ronda (PK ronda, jugador)\nUPDATE puntaje_acumulado / participacion / partida
+R -> DB : COMMIT
+T -> T : publicar RondaLiquidada\n(después del COMMIT, ADR-05)
+T --> A : cierre aceptado
+T -> T : validar FSM para B
+T --> B : rechazado: la ronda ya no está\nEN_JUEGO (fase FINALIZADO)
+note over R, DB
+  Si la capa 1 falla (p. ej., dos instancias del servidor), B llega a la BD:
+  FOR UPDATE espera el COMMIT de A, lee LIQUIDADA y lanza RondaYaLiquidada
+  (ROLLBACK sin escrituras). Capa 3: aunque se saltara esa lectura,
+  la PK (ronda_id, jugador_id) de puntaje_ronda rechaza la doble liquidación.
+end note
+@enduml

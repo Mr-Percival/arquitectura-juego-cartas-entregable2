@@ -1,0 +1,224 @@
+@startuml clases_persistencia
+' Diagrama UML de clases de entidad / persistencia y su mapeo al esquema relacional - V-0.0.1.0
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #F7F9FC
+  BorderColor #2F4A6D
+  ArrowColor #2F4A6D
+}
+skinparam package {
+  BorderColor #8A9BB3
+  FontColor #2F4A6D
+}
+hide empty members
+set separator none
+
+package "Dominio (Entregable 1, Figura 8; juegocartas.nucleo)" #FFFFFF {
+  class Jugador {
+    -id : UUID
+    -alias : String
+    -estado : EstadoJugador
+  }
+  class Partida <<aggregate root>> {
+    -id : UUID
+    -estado : EstadoPartida
+    +aplicar(r : ResultadoRonda) : DecisionFin
+  }
+  class ConfiguracionMesa <<value object>> {
+    -variante : String
+    -parametros : Map<String, Object>
+  }
+  class Ronda {
+    -numero : int
+    -estado : EstadoRonda
+    +cerrar(e : EvaluacionCierre) : void
+  }
+  class Mano {
+    +cartas() : List<Carta> [0..11]
+  }
+  class Carta <<value object>> {
+    -rango : int [0..1]
+    -pinta : Pinta [0..1]
+    -mazo : int
+  }
+  class Turno {
+    -fase : FaseTurno
+    +robar(o : OrigenRobo) : Carta
+    +descartar(c : Carta) : void
+  }
+  class Marcador {
+    -saldos : Map<UUID, int>
+    +aplicar(deltas : Map<UUID, int>) : void
+  }
+  class ResultadoRonda <<value object>> {
+    +deltas : Map<UUID, int>
+    +tipoCierre : String
+  }
+}
+
+package "Persistencia (juegocartas.persistencia)" {
+  class PlayerEntity <<entity>> {
+    {field} <i>tabla = jugador</i>
+    +jugadorId : UUID {id}
+    +alias : str
+    +correo : str [0..1]
+    +creadoEn : datetime
+    +toDomain() : Jugador
+    +{static} fromDomain(j : Jugador) : PlayerEntity
+  }
+  class GameSessionEntity <<entity>> {
+    {field} <i>tabla = partida</i>
+    +partidaId : UUID {id}
+    +salaId : UUID
+    +varianteCodigo : str
+    +estado : EstadoPartida
+    +iniciadaEn : datetime [0..1]
+    +finalizadaEn : datetime [0..1]
+    +ganadorId : UUID [0..1]
+    +toDomain(registro : IResolverVariante) : Partida
+    +{static} fromDomain(p : Partida) : GameSessionEntity
+  }
+  class TableParameterEntity <<entity>> {
+    {field} <i>tabla = parametro_partida</i>
+    +clave : str {id}
+    +valor : str
+    +{static} toConfig(ps : list<TableParameterEntity>, esquema : dict) : ConfiguracionMesa
+  }
+  class ParticipationEntity <<entity>> {
+    {field} <i>tabla = participacion</i>
+    +jugadorId : UUID {id}
+    +asiento : int {1..6}
+    +estadoJugador : EstadoJugador
+  }
+  class AccumulatedScoreEntity <<entity>> {
+    {field} <i>tabla = puntaje_acumulado</i>
+    +jugadorId : UUID {id}
+    +total : int
+    +version : int
+    +aplicar(delta : int) : void
+  }
+  class RoundEntity <<entity>> {
+    {field} <i>tabla = ronda</i>
+    +rondaId : UUID {id}
+    +numero : int
+    +estado : EstadoRonda
+    +semilla : int
+    +cerradaPor : UUID [0..1]
+    +tipoCierre : str [0..1]
+    +toDomain() : Ronda
+  }
+  class HandStateEntity <<entity>> {
+    {field} <i>tablas = mano_jugador + carta_mano</i>
+    +manoId : UUID {id}
+    +jugadorId : UUID
+    +toDomain() : Mano
+    +{static} fromDomain(m : Mano) : HandStateEntity
+  }
+  class CardRef <<embeddable>> {
+    {field} <i>fila de carta_mano</i>
+    +cartaCodigo : str
+    +mazoNumero : int {1..2}
+    +toDomain() : Carta
+  }
+  class TurnMoveEntity <<entity>> {
+    {field} <i>tabla = turno_jugada (solo inserción)</i>
+    +jugadaId : int {id}
+    +numeroTurno : int
+    +accion : AccionJugada
+    +carta : CardRef [0..1]
+    +resultado : ResultadoJugada
+    +motivoRechazo : str [0..1]
+    +comandoId : UUID {unique}
+    +ocurridaEn : datetime
+  }
+  class RoundScoreEntity <<entity>> {
+    {field} <i>tabla = puntaje_ronda</i>
+    +jugadorId : UUID {id}
+    +penalizacion : int {>= 0}
+    +bonificacion : int {>= 0}
+    +delta() : int
+  }
+  class SessionEntity <<entity>> {
+    {field} <i>tabla = sesion (conexión)</i>
+    +sesionId : UUID {id}
+    +jugadorId : UUID
+    +tokenHash : str {unique}
+    +estado : EstadoSesion
+    +expiraEn : datetime
+    +vigente(ahora : datetime) : bool
+  }
+  class RoomEntity <<entity>> {
+    {field} <i>tabla = sala</i>
+    +salaId : UUID {id}
+    +codigoInvitacion : str {unique}
+    +anfitrionId : UUID
+    +capacidad : int {2..6}
+    +estado : EstadoSala
+  }
+  class VariantEntity <<entity>> {
+    {field} <i>tabla = variante</i>
+    +varianteCodigo : str {id}
+    +versionPlugin : str
+    +versionContrato : str
+    +activa : bool
+    +{static} fromPlugin(p : VariantePlugin) : VariantEntity
+  }
+  class CardEntity <<entity>> {
+    {field} <i>tabla = carta (catálogo)</i>
+    +cartaCodigo : str {id}
+    +rango : int [0..1]
+    +pinta : str [0..1]
+    +toDomain(mazo : int) : Carta
+  }
+  class PostgresRepositoryAdapter <<data mapper>> {
+    +liquidarRonda(c : CierreRonda) : void
+    +guardarPartida(p : GameSessionEntity) : void
+    +cargarPartida(id : UUID) : GameSessionEntity
+    +historial(id : UUID) : list<dict>
+    +sincronizarVariantes(vs : list<VariantEntity>) : void
+  }
+}
+
+GameSessionEntity "1" *-- "0..*" TableParameterEntity : parametros
+GameSessionEntity "1" *-- "2..6" ParticipationEntity : participaciones
+ParticipationEntity "1" *-- "0..1" AccumulatedScoreEntity : marcador
+GameSessionEntity "1" *-- "0..*" RoundEntity : rondas
+RoundEntity "1" *-- "0..6" HandStateEntity : manos
+HandStateEntity "1" *-- "0..11" CardRef : cartas
+HandStateEntity "1" *-- "0..*" TurnMoveEntity : jugadas
+RoundEntity "1" *-- "0..6" RoundScoreEntity : puntajes
+ParticipationEntity "0..*" --> "1" PlayerEntity : jugador
+PostgresRepositoryAdapter ..> GameSessionEntity : <<use>>
+SessionEntity "0..*" --> "1" PlayerEntity : jugador
+RoomEntity "0..*" --> "1" PlayerEntity : anfitrion
+GameSessionEntity "0..*" --> "1" RoomEntity : sala
+GameSessionEntity "0..*" --> "1" VariantEntity : variante
+CardRef "0..*" --> "1" CardEntity : carta
+
+PlayerEntity ..> Jugador : <<trace>>
+GameSessionEntity ..> Partida : <<trace>>
+TableParameterEntity ..> ConfiguracionMesa : <<trace>>
+RoundEntity ..> Ronda : <<trace>>
+HandStateEntity ..> Mano : <<trace>>
+CardRef ..> Carta : <<trace>>
+AccumulatedScoreEntity ..> Marcador : <<trace>>
+RoundScoreEntity ..> ResultadoRonda : <<trace>>
+ParticipationEntity ..> Jugador : <<trace>> estado en la partida
+TurnMoveEntity ..> Turno : <<trace>>
+CardEntity ..> Carta : <<trace>>
+
+note as N
+  <b>Mapeo</b>: cada <<entity>> corresponde a una tabla de esquema.sql (indicada en su
+  primer compartimiento); la única excepción es HandStateEntity, que agrega mano_jugador
+  + carta_mano (cada CardRef es una fila de carta_mano). {id} = parte de la PK; las FK
+  hacia el padre en una composición quedan implícitas en la asociación.
+  <<trace>> = la entidad persiste el estado de esa clase de dominio.
+  GameSessionEntity (nombre de la guía) = una PARTIDA; no confundir con SessionEntity
+  (sesión de conexión del jugador).
+end note
+@enduml
