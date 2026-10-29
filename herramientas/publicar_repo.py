@@ -20,6 +20,8 @@ import sys
 import time
 from pathlib import Path
 
+sys.stdout.reconfigure(encoding="utf-8")  # la consola de Windows usa cp1252
+
 RAIZ = Path(__file__).resolve().parents[1]
 INFORME = RAIZ / "docs" / "informe" / "Entregable2.html"
 
