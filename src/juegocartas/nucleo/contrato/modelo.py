@@ -61,6 +61,7 @@ class Marcador:
     """Saldo acumulado por jugador (penalizaciones positivas; meta y bonos negativos)."""
 
     saldos: dict[str, int] = field(default_factory=dict)
+    eliminados: set[str] = field(default_factory=set)  # eliminados en rondas anteriores (R-11)
 
     def aplicar(self, deltas: dict[str, int]) -> None:
         for jugador, delta in deltas.items():

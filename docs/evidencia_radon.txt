@@ -6,7 +6,7 @@ src\juegocartas\nucleo\contrato\combinaciones.py
 src\juegocartas\nucleo\contrato\modelo.py
     C 60:0 Marcador - A (3)
     C 21:0 Carta - A (2)
-    M 65:4 Marcador.aplicar - A (2)
+    M 66:4 Marcador.aplicar - A (2)
     C 8:0 Pinta - A (1)
     C 15:0 TipoCombinacion - A (1)
     M 29:4 Carta.es_comodin - A (1)
@@ -106,22 +106,23 @@ src\juegocartas\persistencia\postgres.py
     M 25:4 PostgresRepositoryAdapter.__init__ - A (1)
     M 45:4 PostgresRepositoryAdapter.historial - A (1)
 src\juegocartas\plugins\apuntado\plugin.py
-    M 61:4 UmbralEliminacion.evaluar - B (7)
+    M 61:4 UmbralEliminacion.evaluar - B (8)
+    C 57:0 UmbralEliminacion - B (6)
+    M 71:4 UmbralEliminacion._desempatar - B (6)
     C 17:0 TablaPuntosEstandar - A (5)
     M 41:4 CierreApuntado._tocar - A (5)
-    C 57:0 UmbralEliminacion - A (5)
     M 20:4 TablaPuntosEstandar.puntos - A (4)
     C 26:0 CierreApuntado - A (4)
     M 52:4 CierreApuntado._misma_pinta - A (4)
     M 35:4 CierreApuntado._completo - A (3)
     M 31:4 CierreApuntado.evaluar - A (2)
-    C 69:0 ReglaApuntadoPlugin - A (2)
+    C 81:0 ReglaApuntadoPlugin - A (2)
     M 27:4 CierreApuntado.__init__ - A (1)
     M 58:4 UmbralEliminacion.__init__ - A (1)
-    M 73:4 ReglaApuntadoPlugin.esquema_configuracion - A (1)
-    M 83:4 ReglaApuntadoPlugin.regla_cierre - A (1)
-    M 86:4 ReglaApuntadoPlugin.tabla_puntos - A (1)
-    M 89:4 ReglaApuntadoPlugin.politica_fin - A (1)
+    M 85:4 ReglaApuntadoPlugin.esquema_configuracion - A (1)
+    M 95:4 ReglaApuntadoPlugin.regla_cierre - A (1)
+    M 98:4 ReglaApuntadoPlugin.tabla_puntos - A (1)
+    M 101:4 ReglaApuntadoPlugin.politica_fin - A (1)
 src\juegocartas\plugins\clasica\plugin.py
     C 19:0 CierreClasico433 - A (4)
     M 20:4 CierreClasico433.evaluar - A (3)
@@ -140,5 +141,5 @@ src\juegocartas\presentacion\gateway.py
     M 21:4 GameGateway._difundir - A (2)
     M 25:4 GameGateway.comando - A (1)
 
-125 blocks (classes, functions, methods) analyzed.
-Average complexity: A (2.024)
+126 blocks (classes, functions, methods) analyzed.
+Average complexity: A (2.0714285714285716)

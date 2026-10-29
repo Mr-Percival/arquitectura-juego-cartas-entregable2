@@ -1,6 +1,6 @@
 # ADR-04. Motor y modelo de persistencia: PostgreSQL relacional (3FN) en una base de datos centralizada
 
-**Estado:** Propuesto · 2026-10-16 · V-0.0.1.0 · pendiente de aprobación del equipo. Reemplaza la propuesta preliminar del C4 del Entregable 1 («Archivos JSON / BD documental»).
+**Estado:** Aceptado · 2026-10-27 · V-0.0.1.0 · aprobado por el equipo. Reemplaza la propuesta preliminar del C4 del Entregable 1 («Archivos JSON / BD documental»).
 
 ## Contexto
 El sistema debe persistir:
@@ -78,6 +78,6 @@ Se adopta **(b): PostgreSQL 16, con un esquema relacional en 3FN** de 14 tablas 
 
 ## Notas
 - Autores: C. Arango Sierra, E. Alzate Zapata y N. Meza Ortega.
-- Fecha de la propuesta: 16-10-2026. Última modificación: 16-10-2026.
+- Fecha de la propuesta: 16-10-2026. Aceptado: 27-10-2026. Última modificación: 27-10-2026.
 - Relacionado con ADR-03 (agnosticismo de la variante) y ADR-05 (los eventos se publican después del *commit*).
 - Detonante para revisar esta decisión: escalar a varios cuantos (base de datos por servicio) o tener una carga de lectura de historiales que justifique réplicas de lectura.

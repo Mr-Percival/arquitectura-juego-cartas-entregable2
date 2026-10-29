@@ -31,4 +31,6 @@ class MatchStandings:
     def actualizar(self, variante: str, config: Mapping[str, Any], marcador: Marcador,
                    deltas: Mapping[str, int]) -> DecisionFin:
         marcador.aplicar(dict(deltas))
-        return self._registro.resolver(variante).politica_fin(config).evaluar(marcador)
+        decision = self._registro.resolver(variante).politica_fin(config).evaluar(marcador)
+        marcador.eliminados.update(decision.eliminados)
+        return decision

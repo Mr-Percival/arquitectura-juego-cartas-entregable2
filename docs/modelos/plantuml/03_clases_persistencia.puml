@@ -53,6 +53,7 @@ package "Dominio (Entregable 1, Figura 8; juegocartas.nucleo)" #FFFFFF {
   }
   class Marcador {
     -saldos : Map<UUID, int>
+    -eliminados : Set<UUID>
     +aplicar(deltas : Map<UUID, int>) : void
   }
   class ResultadoRonda <<value object>> {

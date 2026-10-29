@@ -1,6 +1,6 @@
 # ADR-03. Estilo arquitectónico: microkernel con plug-ins de reglas descubiertos en tiempo de ejecución
 
-**Estado:** Propuesto · 2026-10-16 · V-0.0.1.0 · pendiente de aprobación del equipo (revisión del 21-10-2026). Al aceptarse, **reemplaza a ADR-02**.
+**Estado:** Aceptado · 2026-10-27 · V-0.0.1.0 · aprobado por el equipo. **Reemplaza a ADR-02**.
 
 ## Contexto
 El Entregable 2 exige incorporar o modificar variantes de juego (por ejemplo, Continental o Póker) **sin recompilar ni alterar el orquestador de turnos ni la persistencia**. ADR-02 resolvió la variabilidad con el patrón Strategy dentro del monolito modular, pero aceptó como consecuencia que una variante nueva requiere reconstruir y redesplegar el monolito. También dejó registrado su detonante de cambio: «variantes creadas por terceros o activables sin redespliegue». El requisito de la guía equivale a la primera condición: una variante debe poder llegar como un paquete aparte, sin tocar el artefacto del núcleo.
@@ -22,7 +22,7 @@ Se adopta **(b)**.
 
 **Core system.** Lo forman `nucleo.sala`, `nucleo.turno` (orquestador, repartidor y temporizador), `nucleo.evaluacion`, `nucleo.puntuacion`, `nucleo.registro` y `nucleo.soporte`. Conserva el particionamiento por dominio de ADR-01.
 
-**Contrato.** El contrato común es `VariantePlugin` (versión 1.0), en `juegocartas.nucleo.contrato`, con estas operaciones: `codigo`, `version_contrato`, `esquema_configuracion()`, `regla_cierre(cfg)`, `tabla_puntos(cfg)` y `politica_fin(cfg)`. El contrato incluye además un kit de validadores reutilizables (grupo, escalera, comodín y búsqueda de particiones).
+**Contrato.** El contrato común es `VariantePlugin` (versión 1.0; 1.1 desde el 29-10-2026, que agrega `Marcador.eliminados` y es compatible con los plug-ins 1.x), en `juegocartas.nucleo.contrato`, con estas operaciones: `codigo`, `version_contrato`, `esquema_configuracion()`, `regla_cierre(cfg)`, `tabla_puntos(cfg)` y `politica_fin(cfg)`. El contrato incluye además un kit de validadores reutilizables (grupo, escalera, comodín y búsqueda de particiones).
 
 **Plug-ins.** `ReglaClasicaPlugin` y `ReglaApuntadoPlugin`. Cada uno importa solo el contrato.
 
@@ -73,6 +73,6 @@ Service-based agrega un salto de red en cada cierre, una base de datos compartid
 
 ## Notas
 - Autores: C. Arango Sierra, E. Alzate Zapata y N. Meza Ortega.
-- Fecha de la propuesta: 16-10-2026. Última modificación: 16-10-2026.
+- Fecha de la propuesta: 16-10-2026. Aceptado: 27-10-2026. Última modificación: 27-10-2026.
 - Reemplaza a ADR-02. Complementa a ADR-01, que sigue vigente dentro del núcleo. Relacionado con ADR-04, porque el esquema es agnóstico de la variante, y con ADR-05.
 - Detonante para revisar esta decisión: necesitar plug-ins de terceros no confiables (aislamiento por proceso o *sandbox*) o activarlos sin reiniciar (carga en caliente).

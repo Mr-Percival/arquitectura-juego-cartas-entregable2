@@ -1,6 +1,6 @@
 # ADR-02. Estrategia de modularidad para la variabilidad de reglas: Strategy en monolito modular
 
-**Estado:** Aceptado · 2026-09-29. **En proceso de reemplazo por ADR-03** (propuesto el 2026-10-16). Pasará a «Reemplazado» cuando el equipo acepte ADR-03. Motivo: se activó el detonante registrado en las Notas, porque el Entregable 2 exige agregar variantes como paquetes aparte, sin alterar el orquestador.
+**Estado:** Reemplazado por **ADR-03** · 2026-10-27 (aceptado el 2026-09-29). Motivo: se activó el detonante registrado en las Notas, porque el Entregable 2 exige agregar variantes como paquetes aparte, sin alterar el orquestador.
 
 ## Contexto
 El sistema debe alternar entre Clásica 4-3-3 y Apuntado 101 y admitir reglas opcionales (umbral, comodín, reingreso, apuestas). Opciones evaluadas:

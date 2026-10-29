@@ -61,9 +61,21 @@ class UmbralEliminacion:
     def evaluar(self, marcador: Marcador) -> DecisionFin:
         eliminados = tuple(j for j, s in marcador.saldos.items() if s >= self._umbral)
         vivos = [j for j in marcador.saldos if j not in eliminados]
-        if len(vivos) <= 1:
-            return DecisionFin(True, eliminados, vivos[0] if vivos else None)
+        if len(vivos) == 1:
+            return DecisionFin(True, eliminados, vivos[0])
+        if not vivos and eliminados:
+            return self._desempatar(marcador, eliminados)
         return DecisionFin(False, eliminados)
+
+    @staticmethod
+    def _desempatar(marcador: Marcador, eliminados: tuple[str, ...]) -> DecisionFin:
+        """R-11 (sección 4.3): todos los que seguían vivos llegaron al umbral en la misma ronda.
+
+        Gana el de menor saldo entre ellos; si empatan, el primero en el orden del marcador.
+        """
+        ultimos = [j for j in eliminados if j not in marcador.eliminados] or list(eliminados)
+        ganador = min(ultimos, key=lambda j: marcador.saldos[j])
+        return DecisionFin(True, tuple(j for j in eliminados if j != ganador), ganador)
 
 
 class ReglaApuntadoPlugin:

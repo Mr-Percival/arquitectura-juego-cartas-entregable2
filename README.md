@@ -15,7 +15,7 @@ docs/
     er/                E-R en notación de Barker (lo genera herramientas/generar_er_barker.py)
     sql/               esquema.sql (DDL) y datos_iniciales.sql
   informe/             Entregable2.html → Entregable2.pdf (build_pdf.py)
-  risk_storming/       kit de la sesión y resultados
+  risk_storming/       kit de la sesión y respuestas de la fase 1 (fase1_respuestas.md)
 src/juegocartas/
   nucleo/              core system (contrato, sala, turno, evaluacion, puntuacion, registro, soporte)
   plugins/             clasica, apuntado (solo importan nucleo.contrato)
@@ -32,7 +32,7 @@ tests/
 python -m venv .venv
 .venv/Scripts/activate        # en Linux/macOS: source .venv/bin/activate
 pip install -e ".[dev]"
-pytest tests -v               # 44 pruebas (R1–R9 + integración PostgreSQL)
+pytest tests -v               # 49 pruebas (R1–R9, integración PostgreSQL y fin de partida de Apuntado)
 radon cc src -s -a            # reporte de complejidad ciclomática
 ```
 

@@ -73,7 +73,7 @@ CREATE TABLE participacion (
     jugador_id      UUID         NOT NULL REFERENCES jugador (jugador_id),
     asiento         SMALLINT     NOT NULL CHECK (asiento BETWEEN 1 AND 6),
     estado_jugador  VARCHAR(12)  NOT NULL DEFAULT 'ACTIVO'
-                    CHECK (estado_jugador IN ('ACTIVO', 'ELIMINADO', 'REINGRESADO')),
+                    CHECK (estado_jugador IN ('ACTIVO', 'ELIMINADO', 'REINGRESADO', 'ABANDONO')),  -- ABANDONO: R-03 (sección 4.3)
     PRIMARY KEY (partida_id, jugador_id),
     UNIQUE (partida_id, asiento)
 );

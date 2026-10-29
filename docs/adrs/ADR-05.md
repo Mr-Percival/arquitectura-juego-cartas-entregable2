@@ -1,6 +1,6 @@
 # ADR-05. Sincronización de turnos y comunicación entre componentes: comandos síncronos en memoria y eventos locales para notificar
 
-**Estado:** Propuesto · 2026-10-16 · V-0.0.1.0 · pendiente de aprobación del equipo.
+**Estado:** Aceptado · 2026-10-27 · V-0.0.1.0 · aprobado por el equipo.
 
 ## Contexto
 Hay dos tipos de interacción con necesidades distintas:
@@ -61,9 +61,11 @@ Se adopta **(c)**.
 
 **Planificado para el MVP (Entregable 3):**
 - Prueba de rendimiento: p95 del comando al evento recibido < 200 ms con 20 partidas simultáneas.
+- Mitigación de R-01 (Risk Storming, sección 4.3 del informe): cada partida lleva un número de versión que aumenta con cada comando aceptado y viaja en cada evento. Si el cliente detecta un hueco o se reconecta, pide la instantánea. Los comandos llevan `comando_id`, así que reintentarlos es seguro.
+- Mitigación de R-03: al agotarse el tiempo, el aviso de `TurnTimer` pasa por el mismo candado de la partida y el orquestador juega de forma automática (roba y descarta la carta robada). Tras 2 tiempos agotados seguidos, el jugador pasa a `ABANDONO` (estado ya agregado al CHECK de `participacion.estado_jugador`) y se salta en la rotación.
 
 ## Notas
 - Autores: C. Arango Sierra, E. Alzate Zapata y N. Meza Ortega.
-- Fecha de la propuesta: 16-10-2026. Última modificación: 16-10-2026.
+- Fecha de la propuesta: 16-10-2026. Aceptado: 27-10-2026. Última modificación: 29-10-2026 (mitigaciones de R-01 y R-03).
 - Relacionado con ADR-03 (un solo proceso) y ADR-04 (los eventos se publican después del *commit*).
 - Detonante para revisar esta decisión: desplegar más de una instancia del servidor.

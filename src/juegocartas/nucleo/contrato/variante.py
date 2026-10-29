@@ -10,7 +10,7 @@ from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
 
 from .modelo import Carta, DecisionFin, EvaluacionCierre, Marcador
 
-VERSION_CONTRATO = "1.0"
+VERSION_CONTRATO = "1.1"  # 1.1: Marcador.eliminados (R-11)
 GRUPO_ENTRY_POINTS = "juegocartas.variantes"
 
 
